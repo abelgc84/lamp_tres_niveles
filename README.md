@@ -4,10 +4,14 @@
 # Índice.
 1. [Introducción.](#introducción)
 2. [Infraestructura.](#infraestructura)
-   1. [Infraestructura de red.](#infraestructura-de-red)
-   2. [Creación de Instancias.](#creación-de-instancias)
+   * [Infraestructura de red.](#infraestructura-de-red)
+   * [Creación de Instancias.](#creación-de-instancias)
 4. [Configuración.](#configuración)
-5. [Screencash.](#screencash)
+   * [Balanceador.](#balanceador)
+   * [Apache1.](#apache1)
+   * [Apache2.](#apache2)
+   * [MySQL.](#mysql)
+6. [Screencash.](#screencash)
 
 # Introducción.
 
@@ -48,17 +52,32 @@ Nombramos las subredes y elegimos el tamaño que tendrá cada una.
 
 ![04](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/8573bfed-56c2-4522-b789-10970624dd4a)
 
-#### Gateway NAT
+#### IP elástica
 
-Para que nuestras máquinas tengan salida a Internet y podamos hacer las instalaciones necesarias crearemos una Gateway NAT y la asociaremos a una de las susbredes. La creación de una Gateway NAT requiere que se le asocie una IP elástica, por lo que primero creamos nuestra IP elástica.
-
-En servicios VPC vamos al menú *Direcciones IP elásticas* y pulsamos sobre el botón *Asignar la dirección IP elástica*. No hay nada que configurar para las direcciones IP elásticas, simplemente la creamos y le damos un nombre.
+Necesitaremos una IP elástica para asignársela al balanceador de carga. En servicios VPC vamos al menú *Direcciones IP elásticas* y pulsamos sobre el botón *Asignar la dirección IP elástica*. No hay nada que configurar para las direcciones IP elásticas, simplemente la creamos y le damos un nombre.
 
 ![05](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/19c72b1e-6d65-406a-8d89-31cc475d84c1)
 
-Con nuestra IP elástica ya disponible vamos a servicios VPC, al menú *Gateways NAT* y pulsamos sobre el botón *Crear gateway NAT*. Para crearla simplemente la nombramos, le asociamos una subred y nuestra IP elástica.
+#### Gateway
 
-![06](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/291ad96d-516e-4671-b5b1-eec636359c96)
+Para que nuestras máquinas tengan salida a Internet y podamos hacer las instalaciones necesarias crearemos, de manera temporal, una *Gateway de Internet* y la asociaremos a una de las susbredes. Para crearla no hay más que ir al menú *Puertas de enlace de Internet* y pulsar sobre el botón *Crear Gateway de Internet*. La creación es tán fácil como asignarle un nombre.
+
+![09](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/3ef7e685-2430-4588-85e5-f104e0f85ab7)
+
+Una vez creada la asociamos con nuestra VPC, abrimos las *Acciones* y elegimos *Conectar a la VPC*.
+
+![10](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/00dd2581-9208-463f-a1f4-0013b470c3ab)
+
+Con nuestra puerta de enlace creada, vamos al menú *Tablas de enrutamiento* y añadimos una ruta a nuestra VPC para que el tráfico de red pueda salir a Internet.
+
+![11](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/05ac8e6e-bdf7-4b03-b716-3be3b6c810d4)
+
+![12](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/09f96bb2-4f03-402e-b5e7-4e5dd859ad95)
+
+Ahora vamos al menú *Asociaciones de subredes* para asociar las dos subredes a esa misma tabla de enrutamiento.
+
+![15](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/88c1cf43-ef47-4b28-a6d4-3e3e992e72e3)
+
 
 ## Creación de Instancias
 
@@ -73,13 +92,93 @@ La creación de las cuatro máquinas es igual para todas:
 
 ![07](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/842a092a-6ec6-4105-adfe-12faef758d21)
 
-Como las instancias las hemos creado todas sin dirección IP pública no tenemos ninguna manera de acceder a ellas. Para poder acceder ellas creamos una quinta máquina que, de manera temporal, usaremos como puente para entrar en las otras a través de ssh, a esta máquina le habilitamos la asignación automática de IP pública durante la creación.
+Como las instancias las hemos creado todas sin dirección IP pública no tenemos ninguna manera de acceder a ellas. Para poder acceder a ellas iremos cambiando la asociación de la IP elástica conforme nos haga falta.
 
 Al final tenemos:
 
-![08](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/0c4a2cca-7c17-4dd4-9c76-e8d676340e9b)
+FOTO DE LAS INSTANCIAS
 
 # Configuración.
+
+A realizar en cada máquina:
+
+Asociamos la IP elástica a nuestra máquina y conectamos por ssh.
+
+Si fuera necesario acceder a otra máquina podemos copiair nuestra clave por scp y acceder desde esta máquina. En caso de que la necesitaramos copiar, por seguridad, borramos el archivo antes de irnos.
+```
+scp -i labsuser.pem labsuser.pem admin@18.212.89.13:/$HOME
+```
+Para que esta copia sea válida y pueda ser utilizada debemos cambiar los permisos para que no pueda ser usada ni por el grupo no por otros.
+```
+chmod go-r labsuser.pem
+```
+
+![17](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/761a575d-1768-4f88-9ff2-2ec946991d08)
+
+
+Le cambiaremos el nombre a cada máquina para que en el prompt salga su nombre en lugar de una dirección IP.
+```
+sudo hostnamectl set-hostname nombre_de_la_máquina
+```
+
+## Balanceador.
+
+Instalamos apache.
+```
+sudo apt update
+sudo apt install -y apache2
+```
+Activamos los módulos de apache necesarios para la función de balanceador.
+```
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+sudo a2enmod proxy_ajp
+sudo a2enmod rewrite
+sudo a2enmod deflate
+sudo a2enmod headers
+sudo a2enmod proxy_balancer
+sudo a2enmod proxy_connect
+sudo a2enmod proxy_html
+sudo a2enmod lbmethod_byrequests
+```
+![18](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/5be82aaa-f5dc-4385-bfd0-c7e9e0383c59)
+
+Hacemos una copia del archivo 000-default.conf para editarlo y activarlo. 
+```
+cp 000-default.conf balanceador.conf
+sudo a2ensite balanceador.conf
+sudo a2dissite 000-default.conf
+sudo nano balanceador.conf
+```
+![19](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/400382c4-f1e9-48e1-a562-ea2588a1130a)
+
+Añadimos al archivo de configuración las directivas Proxy y ProxyPass:
+![20](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/82703a74-dd8a-46c1-bb9a-6728befe2913)
+
+Reiniciamos el servicio apache.
+```
+sudo systemctl restart apache2
+```
+
+## Apache1.
+
+Instalamos apache y los módulos necesarios de php.
+```
+sudo apt update
+sudo apt install -y apache2
+sudo apt install php libapache2-mod-php php-mysql
+```
+
+
+
+## Apache2.
+
+Repetimos el proceso hecho en apache1.
+![23](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/4e588b03-c760-4500-bdc7-8b9cb0acd540)
+
+
+
+## MySQL.
 
 
 # Screencash.
