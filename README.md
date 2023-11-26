@@ -106,8 +106,6 @@ sudo hostnamectl set-hostname nombre_de_la_máquina
 
 
 
-
-
 ## Servidores Apache.
 
 Instalamos apache y los módulos necesarios de php.
@@ -118,7 +116,7 @@ sudo apt install php libapache2-mod-php php-mysql
 ```
 ![07](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/2ec92ec8-fccc-4c95-9739-40eef4b9e0f3)
 
-Hacemos el archivo default-ssl.conf, para mantener la plantilla intacta, y lo editamos.
+Hacemos una copia del archivo default-ssl.conf, para mantener la plantilla intacta, y la editamos.
 ```
 cp default-ssl.conf usuarios.conf
 sudo nano usuarios.conf
@@ -189,6 +187,9 @@ GRANT ALL PRIVILEGES ON lamp_db.* TO 'usuarios_user@10.0.10.%';
 FLUSH PRIVILEGES;
 ```
 ![17](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/ef9c2c92-eaa9-49ad-9890-0798faf27101)
+
+El puerto por defecto que escucha mariadb es el 3306, por lo que tenemos que crear una regla nueva, en los grupos de seguridad de las máquinas, que permita la entrada de las conexiones por dicho puerto y cuyo origen venga de las otras máquinas. Muestro las dos reglas creadas para la máquina mysql. Las máquinas apache tendrán una sola regla cuyo origen sea la base de datos.
+![18](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/cd57568c-40a0-4b88-b9fb-da9dcbf98044)
 
 
 
