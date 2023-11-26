@@ -116,10 +116,80 @@ sudo apt update
 sudo apt install -y apache2
 sudo apt install php libapache2-mod-php php-mysql
 ```
+![07](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/2ec92ec8-fccc-4c95-9739-40eef4b9e0f3)
 
+Hacemos el archivo default-ssl.conf, para mantener la plantilla intacta, y lo editamos.
+```
+cp default-ssl.conf usuarios.conf
+sudo nano usuarios.conf
+```
+![10](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/bb2c77de-bf53-41c7-8fb8-8b37cfccda25)
+
+```
+sudo a2ensite usuarios.conf
+sudo a2dissite 000-default.conf
+```
+![08](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/3022226f-4f70-49a4-8f7b-ca121acde597)
+
+Instalamos git y clonamos el repositorio.
+```
+sudo apt install -y git
+sudo mkdir /var/www/html/usuario
+sudo git clone https://github.com/josejuansanchez/iaw-practica-lamp.git /var/www/html/usuarios
+```
+![09](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/d8af3a15-ce19-4052-8be4-9f23e83709d0)
+
+Editamos el archivo config.php de la aplicación.
+```
+sudo nano /var/www/html/usuarios/src/config.php
+```
+![11](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/aa4fe662-6db6-47d1-a400-9a3e7aa2e890)
+
+Instalamos el cliente de mariadb.
+```
+sudo apt install -y mariadb-client
+```
+![12](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/12f914c6-3e60-48c0-8d8c-ea4a75a492a6)
+
+Activamos los módulos ssl de apache2.
+```
+sudo a2enmod ssl
+```
+![13](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/378a3516-507d-4fd8-98d5-3b0c11eff6ed)
+
+Copiamos la base de datos para llevarla al servidor de base de datos.
+```
+scp -i labsuser.pem admin@10.0.10.151:/var/www/html/usuarios/db/database.sql .
+scp -i labsuser.pem database.sql admin@10.0.10.185:/$HOME
+```
+![14](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/8723d75a-3f66-4283-b496-d83fed180963)
 
 
 ## MySQL.
+
+Instalamos el servidor mariadb.
+```
+sudo apt update
+sudo apt install -y mariadb-server
+```
+![15](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/274f1195-adfe-49b5-962b-f2a136865338)
+
+Editamos el archivo 50-server.cnf para modificar el bind-address.
+```
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+![16](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/ce7d0012-134f-4d76-b4ac-bc6876e8cca2)
+
+Cargamos el script de la base de datos, creamos el usuario y le damos los permisos para poder usar la base de datos de la aplicación.
+```
+sudo mysql -u root < $HOME/database.sql
+sudo mysql -u root
+CREATE USER 'usuarios_user@10.0.10.%' IDENTIFIED BY '1234';
+GRANT ALL PRIVILEGES ON lamp_db.* TO 'usuarios_user@10.0.10.%';
+FLUSH PRIVILEGES;
+```
+![17](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/ef9c2c92-eaa9-49ad-9890-0798faf27101)
+
 
 
 ## Balanceador.
