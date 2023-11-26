@@ -31,95 +31,96 @@ Como ya se ha mencionado usamos Amazon Web Services para realizar todo el despli
 
 #### VPC
 
-En primer lugar creamos una VPC (Virtual Private Cloud). Vamos al menú de *servicios de AWS*, elegimos *VPC* y pulsamos sobre el botón *Crear VPC*.
-La nombramos y elegimos una dirección de red privada. En este caso se llamara abel_gijon_lamp_tres_niveles y tendrá la dirección IP 192.168.1.0/24.
+En primer lugar creamos una red virtual VPC (Virtual Private Cloud). Vamos al menú de **servicios de AWS**, elegimos **VPC** y pulsamos sobre el botón **Crear VPC**.
 
-![01](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/cd39fbf6-cd23-434e-9a18-2bbd708ae3e5)
+En este menú tenemos dos opciones, la opción **Solo la VPC** y la opción **VPC y más**. La diferencia entre ellas es que con la primera solo creamos la VPC y con la segunda podemos crear las subredes, las tablas de enrutamiento y las puertas de enlace desde el mismo menú. Como tenemos que crear todos esos recursos elegimos la opción **VPC y más**, de esta manera las asociaciones entre los recursos se harán de manera automática y nos agilizará el trabajo.
 
-#### Subredes
+Las opciones que nos encontramos durante la creación de la VPC son las siguientes:
+* **Generar automáticamente las etiquetas de nombres**: Nos permite nombrar ahora los recursos creados con sus etiquetas de nombre. La marcamos activa para poder editar y generar los nombres desde esta ventana de creación y no tener que editar las etiquetas después. La llamaré AGC.
+* **Bloque CIDR IPv4**: Elegimos la dirección IP inicial y el tamaño de la VPC mediante la notación CIDR. Le doy la IP 10.0.10.0/24.
+* **Bloque CIDR IPv6**: Permite el uso de direcciones IPv6. Lo dejamos desactivado.
+* **Tenencia**: Esta opción sirve para definir si las instancias que se lancen en la VPC se ejecutarán con hardware compartido o dedicado. La dejamos en predeterminado.
+* **Número de zonas de disponibilidad**: Las zonas de disponibilidad son los centros de datos de AWS. Recomiendan usar al menos dos para entornos de producción para disponer de alta disponibilidad. En nuestro caso seleccionamos una.
+* **Cantidad de subredes públicas**: La subred pública será la que tenga acceso a Internet, pondremos una subred pública donde alojaremos nuestro balanceador de carga.
+* **Cantidad de subredes privadas**: La subred privada será la que no tenga acceso público, pondremos una sbred privada donde alojaremos nuestros servidores apache y base de datos.
+* **Personalizar bloques CIDR de subredes**: Se puede elegir los bloques CIDR o dejar que se autoconfigure. Les asigno los bloques 10.0.10.0/25 y 10.0.10.128/25.
+* **Gateway NAT**: Para acceder a la red privada es necesario crearle una Gateway NAT. Le ponemos una.
+* **Puntos de enlace de la VPC**: Nos permite crear una VPC aislada y conectar los servicios de AWS como S3. Le ponemos ninguna.
+* **Opciones de DNS**: Lo dejamos como viene por defecto, activado.
 
-A continuación creamos dos subredes dentro de la VPC que acabamos de crear. Dentro del menú de *Nube Privada Virtual* seleccionamos el submenú *Subredes* y pulsamos sobre el botón *Crear Subred*.
+Pulsamos sobre el botón **Crear VPC** y habremos creado el siguiente esquema:
 
-En el menú de creación de subredes configuramos las dos subredes de la siguiente manera:
+![01](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/33d3deb9-57ae-4888-b1be-9ed2fb182621)
 
-Elegimos la VPC a la que pertenecerán las subredes.
 
-![02](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/ebd177b2-6ccf-498e-906b-d7485d46b4e3)
-
-Nombramos las subredes y elegimos el tamaño que tendrá cada una.
-
-![03](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/27418050-5463-472f-ad13-a8ab958c73da)
-
-![04](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/8573bfed-56c2-4522-b789-10970624dd4a)
 
 #### IP elástica
 
-Necesitaremos una IP elástica para asignársela al balanceador de carga. En servicios VPC vamos al menú *Direcciones IP elásticas* y pulsamos sobre el botón *Asignar la dirección IP elástica*. No hay nada que configurar para las direcciones IP elásticas, simplemente la creamos y le damos un nombre.
+Necesitaremos una IP elástica para asignársela al balanceador de carga. En servicios VPC vamos al menú **Direcciones IP elásticas** y pulsamos sobre el botón **Asignar la dirección IP elástica**. No hay nada que configurar para las direcciones IP elásticas, simplemente la creamos y le damos un nombre.
 
 ![05](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/19c72b1e-6d65-406a-8d89-31cc475d84c1)
 
-#### Gateway
-
-Para que nuestras máquinas tengan salida a Internet y podamos hacer las instalaciones necesarias crearemos, de manera temporal, una *Gateway de Internet* y la asociaremos a una de las susbredes. Para crearla no hay más que ir al menú *Puertas de enlace de Internet* y pulsar sobre el botón *Crear Gateway de Internet*. La creación es tán fácil como asignarle un nombre.
-
-![09](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/3ef7e685-2430-4588-85e5-f104e0f85ab7)
-
-Una vez creada la asociamos con nuestra VPC, abrimos las *Acciones* y elegimos *Conectar a la VPC*.
-
-![10](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/00dd2581-9208-463f-a1f4-0013b470c3ab)
-
-Con nuestra puerta de enlace creada, vamos al menú *Tablas de enrutamiento* y añadimos una ruta a nuestra VPC para que el tráfico de red pueda salir a Internet.
-
-![11](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/05ac8e6e-bdf7-4b03-b716-3be3b6c810d4)
-
-![12](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/09f96bb2-4f03-402e-b5e7-4e5dd859ad95)
-
-Ahora vamos al menú *Asociaciones de subredes* para asociar las dos subredes a esa misma tabla de enrutamiento.
-
-![15](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/88c1cf43-ef47-4b28-a6d4-3e3e992e72e3)
 
 
 ## Creación de Instancias
 
-Para montar nuestra infraestructura necesitaremos cuatro máquinas. Una que actúe como balanceador de carga, dos de ellas actuarán como servidores web y la última será nuestra base de datos. Tanto el balanceador como los servidores red las crearemos en la subred_apache y la base datos la crearemos en la subred_mysql. 
+Para montar nuestra infraestructura necesitaremos cuatro máquinas. Una que actúe como balanceador de carga, dos de ellas actuarán como servidores web y la última será nuestra base de datos. El balanceador lo crearemos en la subred pública y tanto los servidores como la base datos las crearemos en la subred privada. 
 
-La creación de las cuatro máquinas es igual para todas: 
-* La nombramos, cada una con su nombre.
-* Elegimos la AMI, tendrán todas una debian 12.
-* Seleccionamos el par de claves, vockey en este caso.
-* Editamos la configuración red para incluir las máquinas en la VPC, cada máquina en su subred correspondiente y les deshabilitamos la asignación de una IP pública de manera automática.
-* Nombramos también los grupos de seguridad para que se reconozcan con mayor facilidad.
+Vamos al menú **servicios AWS** y elegimos **EC2**, pulsamos sobre el botón **Lanzar instancias** y accederemos al menú de creación de instancias. La creación de las cuatro máquinas es igual para todas: 
+* **Nombre y etiquetas**: Nombramos la instancia y le ponemos etiquetas adicionales si fuera necesario.
+* **Amazon Machine Image (AMI)**: Seleccionamos el sistema operativo. Usaremos Debian 12.
+* **Tipo de instancia**: Hay varios tipos de instancias diferentes que especifican los recursos que tendrá. La dejamos en t2.micro. 
+* **Par de claves**: Para poder conectarse de manera segura se necesita un par de claves. Elegimos par de claves vockey.
+* **Configuración de red**: Editaremos la configuración para incluir las máquinas en la VPC, y cada una en su subred correspondiente. Además, deshabilitamos la asignación de IP pública automática a las máquinas. Aprovechando que estamos editando la configuración de red, reamos y nombramos los grupos de seguridad de cada máquina. La configuración de red quedaría de la siguiente manera (ejemplo con la máquina balanceador).
 
-![07](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/842a092a-6ec6-4105-adfe-12faef758d21)
+![03](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/9fbaf19b-9b82-4bde-9355-8a4847f5825a)
 
-Como las instancias las hemos creado todas sin dirección IP pública no tenemos ninguna manera de acceder a ellas. Para poder acceder a ellas iremos cambiando la asociación de la IP elástica conforme nos haga falta.
+Las opciones de almacenamiento y los detalles avanzado durante la creación de la AMI los dejamos de manera predeterminada.
+
+
+Como las instancias las hemos creado todas sin dirección IP pública no tenemos ninguna manera de acceder a ellas. Para poder acceder a ellas creamos una máquina temporal con IP pública automática que usaremos de puente para entrar en las otras.
 
 Al final tenemos:
 
-FOTO DE LAS INSTANCIAS
+![04](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/fd513650-23a3-4fe2-b0bb-4cabd68e29fb)
+
+
 
 # Configuración.
 
-A realizar en cada máquina:
-
-Asociamos la IP elástica a nuestra máquina y conectamos por ssh.
-
-Si fuera necesario acceder a otra máquina podemos copiair nuestra clave por scp y acceder desde esta máquina. En caso de que la necesitaramos copiar, por seguridad, borramos el archivo antes de irnos.
+Antes de nada copiamos el archivo de nuestra clave en la máquina puente para poder usarlo desde allí y acceder a las otras.
 ```
-scp -i labsuser.pem labsuser.pem admin@18.212.89.13:/$HOME
+scp -i labsuser.pem labsuser.pem admin@3.237.224.119:/$HOME
 ```
-Para que esta copia sea válida y pueda ser utilizada debemos cambiar los permisos para que no pueda ser usada ni por el grupo no por otros.
+Para que esta copia sea válida y la clave pueda ser utilizada debemos cambiar los permisos para que no pueda ser usada ni por el grupo ni por otros.
 ```
 chmod go-r labsuser.pem
 ```
+![05](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/404337ad-c361-4eff-a5e0-53a271af69cc)
 
-![17](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/761a575d-1768-4f88-9ff2-2ec946991d08)
-
-
-Le cambiaremos el nombre a cada máquina para que en el prompt salga su nombre en lugar de una dirección IP.
+Le cambiaremos el nombre a cada máquina para que en el prompt salga su nombre en lugar de una dirección IP. El cambio se hará visible con un reinicio o al salir y entrar en la máquina.
 ```
 sudo hostnamectl set-hostname nombre_de_la_máquina
 ```
+![06](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/0edd1698-2a1c-4619-a0cc-ae4e18cc263b)
+
+
+
+
+
+## Servidores Apache.
+
+Instalamos apache y los módulos necesarios de php.
+```
+sudo apt update
+sudo apt install -y apache2
+sudo apt install php libapache2-mod-php php-mysql
+```
+
+
+
+## MySQL.
+
 
 ## Balanceador.
 
@@ -141,7 +142,7 @@ sudo a2enmod proxy_connect
 sudo a2enmod proxy_html
 sudo a2enmod lbmethod_byrequests
 ```
-![18](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/5be82aaa-f5dc-4385-bfd0-c7e9e0383c59)
+
 
 Hacemos una copia del archivo 000-default.conf para editarlo y activarlo. 
 ```
@@ -150,35 +151,15 @@ sudo a2ensite balanceador.conf
 sudo a2dissite 000-default.conf
 sudo nano balanceador.conf
 ```
-![19](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/400382c4-f1e9-48e1-a562-ea2588a1130a)
+
 
 Añadimos al archivo de configuración las directivas Proxy y ProxyPass:
-![20](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/82703a74-dd8a-46c1-bb9a-6728befe2913)
+
 
 Reiniciamos el servicio apache.
 ```
 sudo systemctl restart apache2
 ```
-
-## Apache1.
-
-Instalamos apache y los módulos necesarios de php.
-```
-sudo apt update
-sudo apt install -y apache2
-sudo apt install php libapache2-mod-php php-mysql
-```
-
-
-
-## Apache2.
-
-Repetimos el proceso hecho en apache1.
-![23](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/4e588b03-c760-4500-bdc7-8b9cb0acd540)
-
-
-
-## MySQL.
 
 
 # Screencash.
