@@ -7,10 +7,10 @@
    * [Infraestructura de red.](#infraestructura-de-red)
    * [Creación de Instancias.](#creación-de-instancias)
 4. [Configuración.](#configuración)
-   * [Balanceador.](#balanceador)
-   * [Apache1.](#apache1)
-   * [Apache2.](#apache2)
+   * [Servidores Apache.](#servidores-apache)
    * [MySQL.](#mysql)
+   * [Balanceador.](#balanceador)
+5. 
 6. [Screencash.](#screencash)
 
 # Introducción.
@@ -201,11 +201,19 @@ mysql -u usuarios_user@10.0.10.% -p -h 10.0.10.185
 
 ## Balanceador.
 
+El balanceador será la entrada a nuestra aplicación por lo que le vamos a asociar nuestra IP elástica.
+> En realidad haciendo esto al principio nos hubieramos podido ahorrar la máquina puente.
+
+En el menú **Red y seguridad** vamos a **Direcciones IP elásticas**. Seleccionamos la IP elástica que tenemos creada y elegimos **Acciones**, **Asociar la dirección IP elástica**. Seleccionamos la opción para asociarla a una instancia y elegimos la instancia del balanceador.
+![20](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/39c3dd16-b1ff-4cbd-b2a6-567a3b9f6ae6)
+
 Instalamos apache.
 ```
 sudo apt update
 sudo apt install -y apache2
 ```
+![21](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/37a6c0f5-8242-41fd-b618-7173e03aa88e)
+
 Activamos los módulos de apache necesarios para la función de balanceador.
 ```
 sudo a2enmod proxy
@@ -219,25 +227,34 @@ sudo a2enmod proxy_connect
 sudo a2enmod proxy_html
 sudo a2enmod lbmethod_byrequests
 ```
+![22](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/44d006aa-e35f-49cf-9819-d2bed5d3ae99)
 
 
-Hacemos una copia del archivo 000-default.conf para editarlo y activarlo. 
+Hacemos una copia del archivo default-ssl.conf para editarlo y no tocar la plantilla. Editamos el nuevo archivo, activamos su configuración y desactivamos el que viene por defecto.
 ```
-cp 000-default.conf balanceador.conf
+sudo cp default-ssl.conf balanceador.conf
 sudo a2ensite balanceador.conf
 sudo a2dissite 000-default.conf
-sudo nano balanceador.conf
 ```
-
+![23](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/cd50b683-2af9-43e4-a7d4-afe2fc170306)
 
 Añadimos al archivo de configuración las directivas Proxy y ProxyPass:
-
-
-Reiniciamos el servicio apache.
 ```
+sudo nano balanceador.conf
+```
+![24](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/d38d2b7c-0aa3-472e-a40f-152a4d8a8c06)
+
+Activamos el módulo ssl de apache y reiniciamos el servicio.
+```
+sudo a2enmod ssl
 sudo systemctl restart apache2
 ```
+![25](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/c45c0486-7b6c-46e1-9ab2-6725003ebffb)
 
+
+# Certificado
+
+# Ajustes de seguridad.
 
 # Screencash.
 
