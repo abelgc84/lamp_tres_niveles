@@ -191,6 +191,12 @@ FLUSH PRIVILEGES;
 El puerto por defecto que escucha mariadb es el 3306, por lo que tenemos que crear una regla nueva, en los grupos de seguridad de las máquinas, que permita la entrada de las conexiones por dicho puerto y cuyo origen venga de las otras máquinas. Muestro las dos reglas creadas para la máquina mysql. Las máquinas apache tendrán una sola regla cuyo origen sea la base de datos.
 ![18](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/cd57568c-40a0-4b88-b9fb-da9dcbf98044)
 
+Hacemos una prueba de conexión para verificar que funciona correctamente. Intentamos acceder desde una de las máquinas apache.
+```
+mysql -u usuarios_user@10.0.10.% -p -h 10.0.10.185
+```
+![19](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/b37e11cf-dd3d-4abe-8fb9-50a9c123263f)
+
 
 
 ## Balanceador.
