@@ -23,17 +23,15 @@ En el tercer nivel tendremos el servidor de bases de datos.
 
 # Infraestructura.
 
-A continuación se explicarán detalladamente los pasos a seguir para la creación de la infraestructura necesaria.
+Como ya se ha mencionado usamos Amazon Web Services para realizar todo el despliegue de la infraestructura. A continuación se explicarán detalladamente los pasos a seguir para la creación de la infraestructura necesaria, tanto la red como los servidores.
 
 ## Infraestructura de red.
-
-Como ya se ha mencionado usamos Amazon Web Services para realizar todo el despliegue de la infraestructura.
 
 #### VPC
 
 En primer lugar creamos una red virtual VPC (Virtual Private Cloud). Vamos al menú de **servicios de AWS**, elegimos **VPC** y pulsamos sobre el botón **Crear VPC**.
 
-En este menú tenemos dos opciones, la opción **Solo la VPC** y la opción **VPC y más**. La diferencia entre ellas es que con la primera solo creamos la VPC y con la segunda podemos crear las subredes, las tablas de enrutamiento y las puertas de enlace desde el mismo menú. Como tenemos que crear todos esos recursos elegimos la opción **VPC y más**, de esta manera las asociaciones entre los recursos se harán de manera automática y nos agilizará el trabajo.
+En este menú tenemos dos opciones, la opción **Solo la VPC** y la opción **VPC y más**. La diferencia entre ellas es que con la primera solo creamos la VPC y con la segunda podemos crear las subredes, las tablas de enrutamiento y las puertas de enlace desde el mismo menú. Como necesitamos crear todos esos recursos elegimos la opción **VPC y más**, de esta manera las asociaciones entre los recursos se harán de manera automática durante el proceso de creación y nos agilizará el trabajo.
 
 Las opciones que nos encontramos durante la creación de la VPC son las siguientes:
 * **Generar automáticamente las etiquetas de nombres**: Nos permite nombrar ahora los recursos creados con sus etiquetas de nombre. La marcamos activa para poder editar y generar los nombres desde esta ventana de creación y no tener que editar las etiquetas después. La llamaré AGC.
@@ -49,6 +47,8 @@ Las opciones que nos encontramos durante la creación de la VPC son las siguient
 * **Opciones de DNS**: Lo dejamos como viene por defecto, activado.
 
 Pulsamos sobre el botón **Crear VPC** y habremos creado el siguiente esquema:
+
+Una red virtual dividida en dos subredes. Cada subred tiene su propia tabla de enrutamiento, con su propia salida a internet. La Gateway NAT, que usan nuestras máquinas en Backend para salir a Internet, la usaremos solo para realizar las instalaciones necesarias en los servidores, cuando hayamos acabado eliminaremos la NAT puesto que no será necesario que esa subred tenga salida a internet.
 
 ![01](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/33d3deb9-57ae-4888-b1be-9ed2fb182621)
 
@@ -71,7 +71,7 @@ Vamos al menú **servicios AWS** y elegimos **EC2**, pulsamos sobre el botón **
 * **Amazon Machine Image (AMI)**: Seleccionamos el sistema operativo. Usaremos Debian 12.
 * **Tipo de instancia**: Hay varios tipos de instancias diferentes que especifican los recursos que tendrá. La dejamos en t2.micro. 
 * **Par de claves**: Para poder conectarse de manera segura se necesita un par de claves. Elegimos par de claves vockey.
-* **Configuración de red**: Editaremos la configuración para incluir las máquinas en la VPC, y cada una en su subred correspondiente. Además, deshabilitamos la asignación de IP pública automática a las máquinas. Aprovechando que estamos editando la configuración de red, reamos y nombramos los grupos de seguridad de cada máquina. La configuración de red quedaría de la siguiente manera (ejemplo con la máquina balanceador).
+* **Configuración de red**: Editaremos la configuración para incluir las máquinas en la VPC, y cada una en su subred correspondiente. Además, deshabilitamos la asignación de IP pública automática a las máquinas. Aprovechando que estamos editando la configuración de red, creamos y nombramos los grupos de seguridad de cada máquina. La configuración de red quedaría de la siguiente manera (ejemplo con la máquina balanceador).
 
 ![03](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/9fbaf19b-9b82-4bde-9355-8a4847f5825a)
 
@@ -98,11 +98,16 @@ chmod go-r labsuser.pem
 ```
 ![05](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/404337ad-c361-4eff-a5e0-53a271af69cc)
 
-Le cambiaremos el nombre a cada máquina para que en el prompt salga su nombre en lugar de una dirección IP. El cambio se hará visible con un reinicio o al salir y entrar en la máquina.
+Por comodidad a la hora de trabajar, le cambiaremos el nombre a cada máquina para que en el prompt salga su nombre en lugar de una dirección IP. El cambio se hará visible con un reinicio o al salir y entrar en la máquina.
 ```
 sudo hostnamectl set-hostname nombre_de_la_máquina
 ```
 ![06](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/0edd1698-2a1c-4619-a0cc-ae4e18cc263b)
+
+La configuración que buscamos es la siguiente: 
+* El balanceador de carga estará en un servidor apache que trabajará con https, con un certificado válido acreditado por Let´s Encrypt.
+* Los servidores apache que tendrán nuestra aplicación web trabajarán con http, puesto que no hay necesidad de que la comunicación con el balanceador este cifrada.
+* El servidor de base de datos, se comunicará con los servidores apache a través del puerto predeterminado de mariadb.
 
 
 
@@ -116,19 +121,20 @@ sudo apt install php libapache2-mod-php php-mysql
 ```
 ![07](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/2ec92ec8-fccc-4c95-9739-40eef4b9e0f3)
 
-Hacemos una copia del archivo default-ssl.conf, para mantener la plantilla intacta, y la editamos.
-> En un primer momento puse las configuraciones directamente con https. Al llegar a la parte de creación del certificado vi que era necesario tener http, por lo que edite y reactive los sitios con el puerto 80. El proceso es exactamente el mismo (copia de la plantilla, edición y activación) por lo que omito las capturas de pantallas.
+Hacemos una copia del archivo 000-default.conf, para mantener la plantilla intacta, y la editamos para modificar el DocumentRoot.
 ```
-cp default-ssl.conf usuarios.conf
+cp 000-default.conf usuarios80.conf
 sudo nano usuarios.conf
 ```
-![10](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/bb2c77de-bf53-41c7-8fb8-8b37cfccda25)
+![10](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/329878e5-a542-4810-a243-28002749bee4)
+
 
 ```
-sudo a2ensite usuarios.conf
+sudo a2ensite usuarios80.conf
 sudo a2dissite 000-default.conf
 ```
-![08](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/3022226f-4f70-49a4-8f7b-ca121acde597)
+![08](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/1ccb1892-7974-464c-a46e-58f252b673e1)
+
 
 Instalamos git y clonamos el repositorio.
 ```
@@ -138,23 +144,28 @@ sudo git clone https://github.com/josejuansanchez/iaw-practica-lamp.git /var/www
 ```
 ![09](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/d8af3a15-ce19-4052-8be4-9f23e83709d0)
 
-Editamos el archivo config.php de la aplicación.
+Editamos el archivo config.php de la aplicación para darle los parámetros de la base de datos.
 ```
 sudo nano /var/www/html/usuarios/src/config.php
 ```
 ![11](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/aa4fe662-6db6-47d1-a400-9a3e7aa2e890)
+
+Le damos la propiedad de los archivos al usuario predeterminado de apache.
+```
+sudo chown -R www-data:www-data /var/www/html/usuarios
+```
+![28](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/2f6fa0dc-6721-470d-9c64-5443c25438a9)
+
+Reiniciamos el servicio.
+```
+sudo systemctl restart apache2
+```
 
 Instalamos el cliente de mariadb.
 ```
 sudo apt install -y mariadb-client
 ```
 ![12](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/12f914c6-3e60-48c0-8d8c-ea4a75a492a6)
-
-Activamos los módulos ssl de apache2.
-```
-sudo a2enmod ssl
-```
-![13](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/378a3516-507d-4fd8-98d5-3b0c11eff6ed)
 
 Copiamos la base de datos para llevarla al servidor de base de datos.
 ```
@@ -243,7 +254,9 @@ Añadimos al archivo de configuración las directivas Proxy y ProxyPass:
 ```
 sudo nano balanceador.conf
 ```
-![24](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/d38d2b7c-0aa3-472e-a40f-152a4d8a8c06)
+![24](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/eafe976b-9582-441d-9a72-d6aec99c6ab9)
+
+
 
 Activamos el módulo ssl de apache y reiniciamos el servicio.
 ```
