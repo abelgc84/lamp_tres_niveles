@@ -255,12 +255,15 @@ sudo systemctl restart apache2
 
 # Certificado
 
-Usamos [My No-IP](https://www.noip.com/es-MX) para crear un nombre de dominio gratuito y asociarlo a la IP elástica de nuestro balanceador. El proceso no tiene ninguna complicación, crearse una cuente e introducir los datos.
+Usamos [My No-IP](https://www.noip.com/es-MX) para crear un nombre de dominio gratuito y asociarlo a la IP elástica de nuestro balanceador. El proceso no tiene ninguna complicación, crearse una cuenta e introducir los datos.
 ![26](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/18df30e0-9625-4db6-aabb-e0b298468d8d)
 
 Para conseguir nuestro certificado autorizado usaremos [Let´s Encrypt](https://letsencrypt.org/es/how-it-works/). Es una autoridad de certificación que proporciona certificados gratuitos para el cifrado de seguridad de nivel de transporte.
 
 Necesitamos demostrar que tenemos el control del dominio para poder obtener el certificado de Let´s Encrypt. Para ello usaremos [Certbot](https://certbot.eff.org/)
+
+![27](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/7fd64b05-31a5-41e8-b3c4-76a00420bfeb)
+
 
 
 # Ajustes de seguridad.
