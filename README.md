@@ -10,7 +10,7 @@
    * [Servidores Apache.](#servidores-apache)
    * [MySQL.](#mysql)
    * [Balanceador.](#balanceador)
-5. 
+5. [Certificado](#certificado)
 6. [Screencash.](#screencash)
 
 # Introducción.
@@ -117,6 +117,7 @@ sudo apt install php libapache2-mod-php php-mysql
 ![07](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/2ec92ec8-fccc-4c95-9739-40eef4b9e0f3)
 
 Hacemos una copia del archivo default-ssl.conf, para mantener la plantilla intacta, y la editamos.
+> En un primer momento puse las configuraciones directamente con https. Al llegar a la parte de creación del certificado vi que era necesario tener http, por lo que edite y reactive los sitios con el puerto 80. El proceso es exactamente el mismo (copia de la plantilla, edición y activación) por lo que omito las capturas de pantallas.
 ```
 cp default-ssl.conf usuarios.conf
 sudo nano usuarios.conf
@@ -253,6 +254,14 @@ sudo systemctl restart apache2
 
 
 # Certificado
+
+Usamos [My No-IP](https://www.noip.com/es-MX) para crear un nombre de dominio gratuito y asociarlo a la IP elástica de nuestro balanceador. El proceso no tiene ninguna complicación, crearse una cuente e introducir los datos.
+![26](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/18df30e0-9625-4db6-aabb-e0b298468d8d)
+
+Para conseguir nuestro certificado autorizado usaremos [Let´s Encrypt](https://letsencrypt.org/es/how-it-works/). Es una autoridad de certificación que proporciona certificados gratuitos para el cifrado de seguridad de nivel de transporte.
+
+Necesitamos demostrar que tenemos el control del dominio para poder obtener el certificado de Let´s Encrypt. Para ello usaremos [Certbot](https://certbot.eff.org/)
+
 
 # Ajustes de seguridad.
 
