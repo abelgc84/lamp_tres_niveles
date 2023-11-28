@@ -11,7 +11,11 @@
    * [MySQL.](#mysql)
    * [Balanceador.](#balanceador)
 5. [Certificado](#certificado)
-6. [Screencash.](#screencash)
+6. [Ajustes de seguridad.](#ajustes-de-seguridad)
+   * [Balanceador de carga.](#balanceador-de-carga)
+   * [Servidores Apache.](#servidores-apache)
+   * [Base de datos.](#base-de-datos)
+8. [Screencash.](#screencash)
 
 # Introducción.
 
@@ -315,26 +319,33 @@ Durante la instalación del certificado se nos realizará algunas preguntas:
 
 # Ajustes de seguridad.
 
+Para editar las ACL de las subredes nos vamos al menú **VPC**, **Seguridad**, **ACL de red**. Elegimos la VPC correspondiente, nos vamos a **Reglas de entrada** y pulsamos sobre **Editar reglas de entrada**. La ACL de red es la lista de control de acceso de la VPC, por lo que afectará a ambas subredes.
+
+El único tráfico que debería entrar desde Internet a nuestra red es a través de las consultas por https al balanceador de carga, por lo que la única regla de entrada que deberiamos tener es para permitir la entrada por el puerto 443. Dejaremos activada una regla que permita la entrada por el puerto 22 para poder conectarnos por ssh, aunque en un entorno como AWS esta regla se podría omitir, y activarla solo cuando fuera necesario conectarse a las máquinas.
+
+A continuación configuramos los grupos de seguridad de las máquinas.
+
+## Balanceador de carga.
+
+En nuestra red pública tenemos el servidor apache que actúa como balanceador de carga. Este servidor recibe peticiones desde internet a través del puerto 443 y se comunica con los servidores web de la red privada mediante el puerto 80.
+
+
+## Servidores apache.
+
+La única comunicación desde el exterior de esta red es a través del balanceador de carga por el puerto 80.
+
+## Base de datos.
 # Screencash.
 
-A continuación se muestra en un breve [video](https://youtu.be/u7tZoemympM) con la aplicación web usuarios funcionando sobre esta infraestructura. En el video se introducen y eliminan usuarios tanto desde un dispositivo ajeno como desde la propia máquina que realiza la grabación.
+A continuación se muestra en un breve [video](https://youtu.be/u7tZoemympM) con la aplicación web, usuarios, funcionando sobre esta infraestructura. En el video se introducen y eliminan usuarios, tanto desde un dispositivo ajeno como desde la propia máquina que realiza la grabación.
 
 
 
-Crear la infraestructura en AWS, nombrando las máquinas con NombreAlumnoMáquina, por ejemplo, CarlosGonzalezBalanceador. Aprovisionar las máquinas para al menos instalar los servidores web y de Base de Datos.
-Hacer pública la máquina de capa1 con una ip elástica.
-Instalar un certificado válido con CertBot y Let´s Script, asociado a un nombre de dominio.
-Crear una lista de control de acceso que solo permita el tráfico necesario en cada subred.
-Ajustar los grupos de seguridad para proteger las instancias.
-Desplegar la aplicación de gestión de usuarios en cada uno de los servidores de Backend.
-OPCIONAL: Desplegar cualquier CMS en lugar de la aplicación de usuarios.
-Crear un documento técnico en Markdown, denominado Readme.md, con la explicación de la práctica paso a paso. En dicho documento se deben incluir imágenes (capturas de pantalla) donde se pueda ver apreciar que cada servidor está corriendo en cada máquina. Este documento deberá tener:
 
-Índice.
-Introducción, explicando cual es el objetivo y en qué infraestructura vamos a trabajar.
-Explicación paso a paso de las configuraciones realizadas, así como cualquier aclaración que se considere oportuna.
-Es fundamental que el documento no contenga faltas de ortografía y tenga un formato adecuado.
-El repositorio de GitHub deberá contener:
+
+
+
+
 
 El documento técnico.
 Además, deberás incluir un screencash donde se aprecie el funcionamiento de la aplicación desplegada.
