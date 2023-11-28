@@ -124,7 +124,7 @@ sudo apt install php libapache2-mod-php php-mysql
 Hacemos una copia del archivo 000-default.conf, para mantener la plantilla intacta, y la editamos para modificar el DocumentRoot.
 ```
 cp 000-default.conf usuarios80.conf
-sudo nano usuarios.conf
+sudo nano usuarios80.conf
 ```
 ![10](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/329878e5-a542-4810-a243-28002749bee4)
 
@@ -136,7 +136,7 @@ sudo a2dissite 000-default.conf
 ![08](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/1ccb1892-7974-464c-a46e-58f252b673e1)
 
 
-Instalamos git y clonamos el repositorio.
+Instalamos git, creamos la carpeta que usaremos para alojar nuestra aplicación y clonamos el repositorio en ella.
 ```
 sudo apt install -y git
 sudo mkdir /var/www/html/usuario
@@ -256,14 +256,13 @@ sudo nano balanceador.conf
 ```
 ![24](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/eafe976b-9582-441d-9a72-d6aec99c6ab9)
 
-
-
 Activamos el módulo ssl de apache y reiniciamos el servicio.
 ```
 sudo a2enmod ssl
 sudo systemctl restart apache2
 ```
 ![25](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/c45c0486-7b6c-46e1-9ab2-6725003ebffb)
+
 
 
 # Certificado
@@ -273,7 +272,42 @@ Usamos [My No-IP](https://www.noip.com/es-MX) para crear un nombre de dominio gr
 
 Para conseguir nuestro certificado autorizado usaremos [Let´s Encrypt](https://letsencrypt.org/es/how-it-works/). Es una autoridad de certificación que proporciona certificados gratuitos para el cifrado de seguridad de nivel de transporte.
 
-Necesitamos demostrar que tenemos el control del dominio para poder obtener el certificado de Let´s Encrypt. Para ello usaremos [Certbot](https://certbot.eff.org/)
+Necesitamos demostrar que tenemos el control del dominio para poder obtener el certificado de Let´s Encrypt. Para ello usaremos [Certbot](https://certbot.eff.org/).
+
+Instalamos snapd.
+```
+sudo apt update
+sudo apt install snapd
+```
+![29](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/e78a52d1-60f0-41ff-b754-a1d3854540f5)
+
+Instalamos snap core y lo actualizamos a su versión más reciente.
+```
+sudo snap install core
+sudo snap refresh core
+```
+![30](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/7191d07d-e53a-4321-82e7-157b6a9e5928)
+
+Eliminamos alguna versión previa, si existiera, e instalamos Certbot.
+```
+sudo apt remove certbot
+sudo snap install --classic certbot
+```
+![31](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/16e1c487-ec0b-425d-a0cf-dbeae8c5e41f)
+
+Creamos un alias para el comando certbot e instalamos certbot.
+```
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+sudo certbot --apache
+```
+![32](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/24240b83-3c01-4fc7-9273-ad398917aba9)
+
+Durante la instalación del certificado se nos realizará algunas preguntas:
+* Dirección de correo electrónico.
+* Aceptar terminos de uso.
+* Se nos preguntará si queremos compartir nuestra dirección de correo.
+* Y por último, nos preguntará nuestro nombre de dominio.
+* En el caso de tener varios sitios activos, nos preguntará a cuál queremos vincular el certificado.
 
 ![27](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/7fd64b05-31a5-41e8-b3c4-76a00420bfeb)
 
