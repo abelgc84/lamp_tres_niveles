@@ -317,6 +317,7 @@ Durante la instalación del certificado se nos realizará algunas preguntas:
 
 # Screencash.
 
+A continuación se muestra en un breve [video](https://youtu.be/u7tZoemympM) con la aplicación web usuarios funcionando sobre esta infraestructura. En el video se introducen y eliminan usuarios tanto desde un dispositivo ajeno como desde la propia máquina que realiza la grabación.
 
 
 
