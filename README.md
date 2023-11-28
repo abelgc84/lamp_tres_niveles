@@ -321,20 +321,32 @@ Durante la instalación del certificado se nos realizará algunas preguntas:
 
 Para editar las ACL de las subredes nos vamos al menú **VPC**, **Seguridad**, **ACL de red**. Elegimos la VPC correspondiente, nos vamos a **Reglas de entrada** y pulsamos sobre **Editar reglas de entrada**. La ACL de red es la lista de control de acceso de la VPC, por lo que afectará a ambas subredes.
 
-El único tráfico que debería entrar desde Internet a nuestra red es a través de las consultas por https al balanceador de carga, por lo que la única regla de entrada que deberiamos tener es para permitir la entrada por el puerto 443. Dejaremos activada una regla que permita la entrada por el puerto 22 para poder conectarnos por ssh, aunque en un entorno como AWS esta regla se podría omitir, y activarla solo cuando fuera necesario conectarse a las máquinas.
+El tráfico que debería entrar desde Internet a nuestra red es a través de los puertos relacionados con la resolución de nombres DNS, y los puertos asociados a los servicios web, http y https. Dejaremos activada una regla que permita la entrada por el puerto 22 para poder conectarnos por ssh, aunque en un entorno como AWS esta regla se podría omitir, y activarla solo cuando fuera necesario conectarse a las máquinas.
+![37](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/f89f0789-1b4c-4780-969b-ce14803b70f7)
+> Al final estas reglas las desactive porque me daban error de conexión a través del puerto 80. Lo intenté arreglar pero no entiendo muy bien por qué esta fallando el puerto 80 si lo tengo abierto.
+> ![38](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/eeed2080-ed3e-481f-8fe9-264d4e77f7be)
+> He dejado la ACL predeterminada.
 
-A continuación configuramos los grupos de seguridad de las máquinas.
+A continuación configuramos los grupos de seguridad de las máquinas. Para entrar en los grupos de seguridad seleccionamos el menú de EC2, vamos a **Red y seguridad** y **Security Groups**. Nos aparece la lista de todos los grupos de seguridad que tenemos creados. Seleccionamos el grupo de seguridad que queramos modificar, nos vamos a **Reglas de entrada** y hacemos clic sobre **Editar reglas de entrada**.
 
 ## Balanceador de carga.
 
-En nuestra red pública tenemos el servidor apache que actúa como balanceador de carga. Este servidor recibe peticiones desde internet a través del puerto 443 y se comunica con los servidores web de la red privada mediante el puerto 80.
+Este servidor recibe peticiones desde internet a través del puerto 443 y se comunica con los servidores web de la red privada mediante el puerto 80.
+![36](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/5d302e40-2996-43ea-a484-0513134da910)
 
 
 ## Servidores apache.
 
-La única comunicación desde el exterior de esta red es a través del balanceador de carga por el puerto 80.
+La única que deben recibir los servidores apache es el puerto 80, por el que se comunica el balanceador, y el puerto 3306, por el que se comunica la base de datos.
+![35](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/8bf85934-5417-4164-ad08-3a17a8288e33)
+
 
 ## Base de datos.
+
+La única comunicación que necesitamos en la base de datos es el puerto predeterminado de mariadb, 3306.
+![34](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/7a282d32-9e74-419a-b86f-ba2eb30c67a4)
+
+
 # Screencash.
 
 A continuación se muestra en un breve [video](https://youtu.be/u7tZoemympM) con la aplicación web, usuarios, funcionando sobre esta infraestructura. En el video se introducen y eliminan usuarios, tanto desde un dispositivo ajeno como desde la propia máquina que realiza la grabación.
