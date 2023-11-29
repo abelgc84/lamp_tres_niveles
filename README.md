@@ -45,7 +45,7 @@ Las opciones que nos encontramos durante la creación de la VPC son las siguient
 * **Tenencia**: Esta opción sirve para definir si las instancias que se lancen en la VPC se ejecutarán con hardware compartido o dedicado. La dejamos en predeterminado.
 * **Número de zonas de disponibilidad**: Las zonas de disponibilidad son los centros de datos de AWS. Recomiendan usar al menos dos para entornos de producción para disponer de alta disponibilidad. En nuestro caso seleccionamos una.
 * **Cantidad de subredes públicas**: La subred pública será la que tenga acceso a Internet, pondremos una subred pública donde alojaremos nuestro balanceador de carga.
-* **Cantidad de subredes privadas**: La subred privada será la que no tenga acceso público, pondremos una sbred privada donde alojaremos nuestros servidores apache y base de datos.
+* **Cantidad de subredes privadas**: La subred privada será la que no tenga acceso público, pondremos una subred privada donde alojaremos nuestros servidores apache y base de datos.
 * **Personalizar bloques CIDR de subredes**: Se puede elegir los bloques CIDR o dejar que se autoconfigure. Les asigno los bloques 10.0.10.0/25 y 10.0.10.128/25.
 * **Gateway NAT**: Para acceder a la red privada es necesario crearle una Gateway NAT. Le ponemos una.
 * **Puntos de enlace de la VPC**: Nos permite crear una VPC aislada y conectar los servicios de AWS como S3. Le ponemos ninguna.
@@ -53,7 +53,7 @@ Las opciones que nos encontramos durante la creación de la VPC son las siguient
 
 Pulsamos sobre el botón **Crear VPC** y habremos creado el siguiente esquema:
 
-Una red virtual dividida en dos subredes. Cada subred tiene su propia tabla de enrutamiento, con su propia salida a internet. La Gateway NAT, que usan nuestras máquinas en Backend para salir a Internet, la usaremos solo para realizar las instalaciones necesarias en los servidores, cuando hayamos acabado eliminaremos la NAT puesto que no será necesario que esa subred tenga salida a internet.
+Una red virtual dividida en dos subredes. Cada subred tiene su propia tabla de enrutamiento, con su propia salida a internet. La Gateway NAT, que usan nuestras máquinas en Backend para salir a Internet, la usaremos solo para realizar las instalaciones necesarias en los servidores, cuando hayamos acabado eliminaremos la NAT puesto que no será necesario que esa subred tenga salida a Internet.
 
 ![01](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/33d3deb9-57ae-4888-b1be-9ed2fb182621)
 
