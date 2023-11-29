@@ -6,16 +6,17 @@
 2. [Infraestructura.](#infraestructura)
    * [Infraestructura de red.](#infraestructura-de-red)
    * [Creación de Instancias.](#creación-de-instancias)
-4. [Configuración.](#configuración)
+3. [Configuración.](#configuración)
    * [Servidores Apache.](#servidores-apache)
    * [MySQL.](#mysql)
    * [Balanceador.](#balanceador)
-5. [Certificado](#certificado)
-6. [Ajustes de seguridad.](#ajustes-de-seguridad)
+4. [Certificado](#certificado)
+5. [Ajustes de seguridad.](#ajustes-de-seguridad)
    * [Balanceador de carga.](#balanceador-de-carga)
    * [Servidores Apache.](#servidores-apache)
    * [Base de datos.](#base-de-datos)
-8. [Screencash.](#screencash)
+6. [Screencash.](#screencash)
+7. [CMS.](#cms)
 
 # Introducción.
 
@@ -351,6 +352,28 @@ La única comunicación que necesitamos en la base de datos es el puerto predete
 
 A continuación se muestra en un breve [video](https://youtu.be/crKSSvOKRWk) con la aplicación web, usuarios, funcionando sobre esta infraestructura. En el video se introducen y eliminan usuarios, tanto desde un dispositivo ajeno como desde la propia máquina que realiza la grabación.
 
+# CMS.
+
+> Realmente intentos de instalación.
+>
+> Primero intenté instalar wordpress. Siguiendo los pasos de la [guía](https://developer.wordpress.org/advanced-administration/before-install/howto-install/#detailed-instructions), pero a la hora de conectar se me quedaba colgado con el acceso con la base de datos.
+>
+> Luego decicí probar con prestashop, igualmente siguiendo la [guía](https://devdocs.prestashop-project.org/8/basics/installation/) de instalación. Al principio intenté instalarlo directamente en las dos máquinas a la vez, con el balanceador activado, y me dió problemas. Al desactivar el balanceador pude instalarlo en uno de los servidores correctamente. Aunque luego al intentar conectar me daba un error http 200, investigando un poco encontré que el motivo era que no tenía activadas algunas extensiones de php, pero en realidad sí que las activé así que no sé que pudo pasar ahí.
+>
+> Algunas imágenes del proceso.
+> ![p01](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/719c8da5-d7f0-460a-9ef0-a3d3f00224ab)
+> ![p04](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/2146fead-c2fa-4d99-b7fe-12f61e581d64)
+> ![p07](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/a9c92180-b29f-4249-b9a5-65cef6054976)
+> ![p16](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/92cc5765-19fd-4a8a-a5a9-4bd3683d9517)
+> ![p17](https://github.com/abelgc84/lamp_tres_niveles/assets/146434908/234eccff-2184-4018-906c-27c2e8b77bdb)
+>
+> En algún momento de todo el proceso que tuve con los cms se me estropeó la base de datos, e incluso la aplicación de los usuarios me dejó de funcionar porque no era capaz de acceder. Por lo que estuve viendo podría estar corrompida y habría que repararla.
+>
+> Editando el fichero 50-server.cnf y añadiendo la línea:
+> ```
+> skip-grant-tables = TRUE
+> ```
+> La base de datos funciona, pero ese comando básicamente lo que hace es permitir un acceso completo a todos los usuarios que haya en la base de datos por lo que la seguridad es nula.
 
 
 
@@ -359,6 +382,3 @@ A continuación se muestra en un breve [video](https://youtu.be/crKSSvOKRWk) con
 
 
 
-El documento técnico.
-Además, deberás incluir un screencash donde se aprecie el funcionamiento de la aplicación desplegada.
-En la entrega de la tarea deberás incluir la URL de tu repositorio y la URL de acceso a la aplicación desplegada.
